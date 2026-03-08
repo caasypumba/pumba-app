@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel Admin — Bot Generator Pumba</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      min-height: 100%; background: #0A0000; color: #fff;
+      font-family: Arial, sans-serif; font-size: 15px;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(204,0,0,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(204,0,0,.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .glow { position: fixed; border-radius: 50%; pointer-events: none; }
+    .glow1 { top:-15vw; right:-10vw; width:55vw; height:55vw;
+      background: radial-gradient(circle, rgba(204,0,0,.15), transparent 70%);
+      animation: pulse 3s ease-in-out infinite alternate; }
+    .glow2 { bottom:-12vw; left:-8vw; width:45vw; height:45vw;
+      background: radial-gradient(circle, rgba(122,0,0,.18), transparent 70%);
+      animation: pulse 3s ease-in-out infinite alternate-reverse; }
+    @keyframes pulse { from{opacity:.5} to{opacity:1} }
+
+    /* ── Layout ── */
+    .wrap { position: relative; z-index:1; max-width: 780px; margin: 0 auto; padding: 32px 20px 60px; }
+
+    /* ── Header ── */
+    header { text-align: center; margin-bottom: 36px; }
+    header h1 { font-size: clamp(28px,7vw,48px); font-weight:900; letter-spacing:.12em;
+      background: linear-gradient(135deg,#fff 30%,#cc4444);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    header p { font-size:12px; letter-spacing:.25em; color:#CC0000; margin-top:6px; text-transform:uppercase; }
+
+    /* ── Status badge ── */
+    #status-bar { display:flex; align-items:center; justify-content:center; gap:8px;
+      margin-bottom:28px; font-size:12px; letter-spacing:.15em; color:rgba(255,255,255,.4); }
+    .dot { width:8px; height:8px; border-radius:50%; background:#CC0000;
+      box-shadow:0 0 8px #CC0000; animation:blink 1.4s ease-in-out infinite alternate; }
+    .dot.green { background:#00cc66; box-shadow:0 0 8px #00cc66; }
+    @keyframes blink { from{opacity:.3} to{opacity:1} }
+
+    /* ── Cards ── */
+    .card { background: rgba(20,0,0,.7); border:1px solid rgba(204,0,0,.25);
+      border-radius:16px; padding:24px; margin-bottom:20px;
+      box-shadow: 0 0 30px rgba(204,0,0,.08); }
+    .card-title { font-size:11px; letter-spacing:.3em; color:#CC0000;
+      text-transform:uppercase; font-weight:700; margin-bottom:18px; }
+
+    /* ── Toggle switch ── */
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .toggle-label { font-size:16px; font-weight:700; }
+    .toggle-sub { font-size:12px; color:rgba(255,255,255,.4); margin-top:3px; }
+    .switch { position:relative; width:58px; height:30px; flex-shrink:0; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; inset:0; background:#333; border-radius:30px;
+      cursor:pointer; transition:.3s; border:1px solid rgba(204,0,0,.3); }
+    .slider::before { content:''; position:absolute; width:22px; height:22px;
+      left:4px; top:3px; background:#888; border-radius:50%; transition:.3s; }
+    input:checked + .slider { background:linear-gradient(135deg,#CC0000,#7A0000);
+      border-color:#CC0000; box-shadow:0 0 14px rgba(204,0,0,.5); }
+    input:checked + .slider::before { transform:translateX(28px); background:#fff; }
+
+    /* ── Inputs ── */
+    .field { margin-bottom:16px; }
+    .field label { display:block; font-size:11px; letter-spacing:.2em; color:rgba(255,255,255,.5);
+      text-transform:uppercase; margin-bottom:7px; }
+    .field input { width:100%; background:rgba(0,0,0,.5); border:1px solid rgba(204,0,0,.3);
+      border-radius:10px; padding:12px 14px; color:#fff; font-size:14px; outline:none;
+      transition:border-color .2s; }
+    .field input:focus { border-color:#CC0000; box-shadow:0 0 12px rgba(204,0,0,.25); }
+
+    /* ── Button ── */
+    .btn { display:flex; align-items:center; justify-content:center; gap:8px;
+      width:100%; padding:14px; border-radius:12px; border:none; cursor:pointer;
+      background:linear-gradient(135deg,#CC0000,#7A0000); color:#fff;
+      font-size:14px; font-weight:700; letter-spacing:.15em; text-transform:uppercase;
+      box-shadow:0 0 24px rgba(204,0,0,.4); transition:transform .15s, box-shadow .15s; }
+    .btn:hover { transform:scale(1.02); box-shadow:0 0 36px rgba(204,0,0,.6); }
+    .btn:active { transform:scale(.98); }
+    .btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+    /* ── Toast ── */
+    #toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px);
+      background:#CC0000; color:#fff; padding:12px 28px; border-radius:30px;
+      font-size:13px; font-weight:700; letter-spacing:.1em; opacity:0;
+      transition:all .35s; z-index:999; white-space:nowrap; }
+    #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* ── Users table ── */
+    .users-list { display:flex; flex-direction:column; gap:10px; }
+    .user-item { display:flex; align-items:center; gap:14px;
+      background:rgba(0,0,0,.4); border:1px solid rgba(204,0,0,.15);
+      border-radius:12px; padding:12px 16px; }
+    .user-avatar { width:38px; height:38px; border-radius:50%; object-fit:cover;
+      border:2px solid rgba(204,0,0,.4); flex-shrink:0;
+      background:#1a0000; display:flex; align-items:center; justify-content:center;
+      font-size:16px; font-weight:700; color:#CC0000; overflow:hidden; }
+    .user-avatar img { width:100%; height:100%; object-fit:cover; }
+    .user-info { flex:1; min-width:0; }
+    .user-email { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .user-date { font-size:11px; color:rgba(255,255,255,.35); margin-top:2px; }
+    .user-badge { font-size:10px; letter-spacing:.1em; padding:3px 10px;
+      border-radius:20px; background:rgba(204,0,0,.15);
+      border:1px solid rgba(204,0,0,.3); color:#CC0000; flex-shrink:0; }
+
+    #users-count { font-size:11px; color:rgba(255,255,255,.35); margin-bottom:14px; letter-spacing:.1em; }
+    #no-users { text-align:center; color:rgba(255,255,255,.3); font-size:13px; padding:20px; }
+
+    /* ── Loading ── */
+    .loading { text-align:center; color:rgba(255,255,255,.3); font-size:13px;
+      padding:20px; animation:fade 1s ease-in-out infinite alternate; }
+    @keyframes fade { from{opacity:.3} to{opacity:.8} }
+  </style>
+</head>
+<body>
+
+<div class="glow glow1"></div>
+<div class="glow glow2"></div>
+
+<div class="wrap">
+
+  <!-- Header -->
+  <header>
+    <h1>PUMBA</h1>
+    <p>Panel de Administración</p>
+  </header>
+
+  <!-- Status -->
+  <div id="status-bar">
+    <div class="dot" id="conn-dot"></div>
+    <span id="conn-text">Conectando...</span>
+  </div>
+
+  <!-- ── Anuncio de actualización ── -->
+  <div class="card">
+    <div class="card-title">🔴 Control de Actualización</div>
+
+    <div class="toggle-row" style="margin-bottom:20px">
+      <div>
+        <div class="toggle-label">Forzar actualización</div>
+        <div class="toggle-sub">Los usuarios verán el popup al abrir la app</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggle-update"/>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="field">
+      <label>Versión nueva</label>
+      <input type="text" id="inp-version" placeholder="ej: 1.0.2"/>
+    </div>
+    <div class="field">
+      <label>Mensaje para el usuario</label>
+      <input type="text" id="inp-message" placeholder="ej: Nueva versión con mejoras..."/>
+    </div>
+    <div class="field">
+      <label>Link de descarga del APK</label>
+      <input type="text" id="inp-url" placeholder="https://github.com/..."/>
+    </div>
+
+    <button class="btn" id="btn-save" onclick="saveUpdate()">
+      💾 GUARDAR CAMBIOS
+    </button>
+  </div>
+
+  <!-- ── Usuarios registrados ── -->
+  <div class="card">
+    <div class="card-title">👥 Usuarios Registrados</div>
+    <div id="users-count">Cargando...</div>
+    <div class="users-list" id="users-list">
+      <div class="loading">Cargando usuarios...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Firebase SDKs -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot }
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCITVar8Dkjtc_TyRF792l6wCB1q3-gzwQ",
+    authDomain: "bot-generator-1124e.firebaseapp.com",
+    projectId: "bot-generator-1124e",
+    storageBucket: "bot-generator-1124e.firebasestorage.app",
+    messagingSenderId: "714803053962",
+    appId: "1:714803053962:web:b181ae39c09921300ff473",
+    measurementId: "G-26XSJ960EK"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // ── Status ──
+  function setConnected(ok) {
+    document.getElementById('conn-dot').className = 'dot' + (ok ? ' green' : '');
+    document.getElementById('conn-text').textContent = ok ? 'CONECTADO EN TIEMPO REAL' : 'SIN CONEXIÓN';
+  }
+
+  // ── Toast ──
+  function toast(msg, color='#CC0000') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = color;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── Cargar config de actualización ──
+  async function loadUpdate() {
+    try {
+      const snap = await getDoc(doc(db, 'config', 'update'));
+      if (snap.exists()) {
+        const d = snap.data();
+        document.getElementById('toggle-update').checked = d.forceUpdate ?? false;
+        document.getElementById('inp-version').value  = d.version ?? '';
+        document.getElementById('inp-message').value  = d.message ?? '';
+        document.getElementById('inp-url').value      = d.downloadUrl ?? '';
+      }
+      setConnected(true);
+    } catch(e) {
+      setConnected(false);
+      toast('Error al conectar con Firebase');
+    }
+  }
+
+  // ── Guardar config ──
+  window.saveUpdate = async function() {
+    const btn = document.getElementById('btn-save');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+    try {
+      await setDoc(doc(db, 'config', 'update'), {
+        forceUpdate:  document.getElementById('toggle-update').checked,
+        version:      document.getElementById('inp-version').value.trim(),
+        message:      document.getElementById('inp-message').value.trim(),
+        downloadUrl:  document.getElementById('inp-url').value.trim(),
+      });
+      toast('✅ Cambios guardados correctamente', '#007700');
+    } catch(e) {
+      toast('❌ Error al guardar: ' + e.message);
+    }
+    btn.disabled = false;
+    btn.textContent = '💾 GUARDAR CAMBIOS';
+  };
+
+  // ── Usuarios en tiempo real (lee desde Firestore) ──
+  // NOTA: Los usuarios de Auth no son accesibles desde el cliente directamente.
+  // Para mostrarlos necesitas guardarlos en Firestore cuando se registran.
+  // Por eso aquí mostramos los que hayas guardado en la colección "users".
+  function listenUsers() {
+    const list = document.getElementById('users-list');
+    const count = document.getElementById('users-count');
+    onSnapshot(collection(db, 'users'), (snap) => {
+      if (snap.empty) {
+        count.textContent = '0 usuarios registrados';
+        list.innerHTML = '<div id="no-users">Ningún usuario registrado aún</div>';
+        return;
+      }
+      count.textContent = snap.size + ' usuario' + (snap.size !== 1 ? 's' : '') + ' registrado' + (snap.size !== 1 ? 's' : '');
+      list.innerHTML = '';
+      snap.forEach(d => {
+        const u = d.data();
+        const initials = (u.name || u.email || '?')[0].toUpperCase();
+        const fecha = u.createdAt?.toDate
+          ? u.createdAt.toDate().toLocaleDateString('es-CO')
+          : 'Sin fecha';
+        list.innerHTML += `
+          <div class="user-item">
+            <div class="user-avatar">
+              ${u.photoURL
+                ? `<img src="${u.photoURL}" onerror="this.style.display='none';this.parentNode.textContent='${initials}'">`
+                : initials}
+            </div>
+            <div class="user-info">
+              <div class="user-email">${u.email || 'Sin correo'}</div>
+              <div class="user-date">${u.name || ''} · Registro: ${fecha}</div>
+            </div>
+            <div class="user-badge">Google</div>
+          </div>`;
+      });
+    });
+  }
+
+  loadUpdate();
+  listenUsers();
+</script>
+
+</body>
+</html>
