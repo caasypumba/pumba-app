@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bot Generator Pumba</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: #0A0000;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      overflow: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(204,0,0,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(204,0,0,.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+    .glow1 {
+      position: fixed; top: -20vw; right: -10vw;
+      width: 60vw; height: 60vw; border-radius: 50%;
+      background: radial-gradient(circle, rgba(204,0,0,.18), transparent 70%);
+      animation: pulse 3s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    .glow2 {
+      position: fixed; bottom: -15vw; left: -10vw;
+      width: 50vw; height: 50vw; border-radius: 50%;
+      background: radial-gradient(circle, rgba(122,0,0,.22), transparent 70%);
+      animation: pulse 3s ease-in-out infinite alternate-reverse;
+      pointer-events: none;
+    }
+    @keyframes pulse { from{opacity:.5} to{opacity:1} }
+
+    .page {
+      position: relative; z-index: 1;
+      height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; gap: 20px;
+      padding: 24px;
+    }
+
+    .app-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(13px, 4vw, 18px);
+      letter-spacing: .4em;
+      background: linear-gradient(135deg, #ff4444, #cc0000);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(64px, 18vw, 110px);
+      letter-spacing: .12em; line-height: 1;
+      background: linear-gradient(135deg, #fff 30%, #cc4444);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .version {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(204,0,0,.45);
+      background: rgba(204,0,0,.1);
+      font-size: 13px; letter-spacing: .15em; font-weight: 700;
+      color: #CC0000;
+    }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #CC0000; box-shadow: 0 0 8px #CC0000;
+      animation: blink 1.4s ease-in-out infinite alternate;
+    }
+    @keyframes blink { from{opacity:.3} to{opacity:1} }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 18px 48px;
+      border-radius: 40px;
+      background: linear-gradient(135deg, #CC0000, #7A0000);
+      border: 1px solid rgba(255,34,0,.5);
+      color: #fff; text-decoration: none;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(20px, 5vw, 26px);
+      letter-spacing: .2em;
+      box-shadow: 0 0 36px rgba(204,0,0,.6), 0 0 14px rgba(255,34,0,.25);
+      transition: transform .15s, box-shadow .15s;
+      margin-top: 10px;
+    }
+    .btn:hover { transform: scale(1.05); box-shadow: 0 0 55px rgba(204,0,0,.85); }
+    .btn:active { transform: scale(.97); }
+  </style>
+</head>
+<body>
+<div class="glow1"></div>
+<div class="glow2"></div>
+
+<div class="page">
+  <p class="app-name">BOT GENERATOR</p>
+  <h1>PUMBA</h1>
+
+  <div class="version">
+    <div class="dot"></div>
+    VERSIÓN 1.0.1
+  </div>
+
+  <a class="btn" href="BotGeneratorPumba.apk" download="BotGeneratorPumba.apk">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+         stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    DESCARGAR APK
+  </a>
+</div>
+</body>
+</html>
